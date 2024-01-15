@@ -1,51 +1,49 @@
-const homeModel = require("../Models/homeModal");
+const homeModel = require("../Models/homeModel");
+
 const homeData = async (req, res) => {
   try {
     const {
-      _id,
       id,
       Photos,
       Description,
       Price,
       Key,
+      Dollar,
       Location,
       Bedrooms,
       Bathrooms,
       Area,
+      propertyName,
       Published,
     } = req.body;
-    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    let query = {};
-    if (_id) {
-      // Use the provided _id in the query if it exists
-      query._id = _id;
-    }
-
-    const update = {
-      id,
-      Photos,
-      Description,
-      Price,
-      Key,
-      Location,
-      Bedrooms,
-      Bathrooms,
-      Area,
-      Published,
-    };
-
-    // Find a document with the provided _id (if it exists) and update it with the new values
-    const updatedData = await homeModel.findOneAndUpdate(
-      query,
-      update,
-      options
+    // findOneAndUpdate parameters: query, update, options
+    const newData = await homeModel.findOneAndUpdate(
+      { id },
+      {
+        id,
+        Photos,
+        Description,
+        Price,
+        Key,
+        Dollar,
+        Location,
+        Bedrooms,
+        Bathrooms,
+        Area,
+        propertyName,
+        Published,
+      },
+      {
+        new: true,
+        upsert: true,
+      }
     );
 
-    return res.status(200).send({
+    return res.status(201).send({
       status: true,
       msg: "Data created or updated successfully",
-      data: updatedData,
+      data: newData,
     });
   } catch (err) {
     return res
@@ -56,7 +54,7 @@ const homeData = async (req, res) => {
 
 const getData = async (req, res) => {
   try {
-    const homeData = await homeModel.find();
+    const homeData = await homeModel.find({ isDeleted: false });
     res.status(200).send({
       status: true,
       msg: "homeData retrieved succesfully",
@@ -82,9 +80,10 @@ const getById = async (req, res) => {
 
 const updateData = async (req, res) => {
   try {
-    let data = req.body;
-    const { Published } = data;
+    const { Published } = req.body;
+
     let homeId = req.params.homeId;
+
     const existingUnit = await homeModel.findOne({
       Published,
       id: { $ne: homeId },
@@ -98,10 +97,10 @@ const updateData = async (req, res) => {
       },
       { new: true }
     );
-    console.log("up", updateBody);
+    // console.log("up", updateBody);
     return res.status(200).send({
       status: true,
-      messege: "Data updated successfully",
+      msg: "Data updated successfully",
       data: updateBody,
     });
   } catch (err) {
@@ -110,6 +109,7 @@ const updateData = async (req, res) => {
       .send({ status: false, msg: "server error", error: err.message });
   }
 };
+
 const Deletedata = async (req, res) => {
   try {
     const result = await homeModel.deleteMany({});

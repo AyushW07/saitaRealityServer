@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const homeSchema = new mongoose.Schema(
+const HomeSchema = new mongoose.Schema(
   {
     id: {
       type: Number,
@@ -15,11 +15,14 @@ const homeSchema = new mongoose.Schema(
     Price: {
       type: String,
     },
+    Dollar: {
+      type: String,
+    },
     Key: {
       type: [String],
     },
     Location: {
-      type: String,
+      type: [String],
     },
     Bedrooms: {
       type: String,
@@ -28,6 +31,9 @@ const homeSchema = new mongoose.Schema(
       type: String,
     },
     Area: {
+      type: String,
+    },
+    propertyName: {
       type: String,
     },
     Published: {
@@ -41,4 +47,4 @@ const homeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-module.exports = mongoose.model("HomeData", homeSchema);
+module.exports = mongoose.model("Homesaita", HomeSchema);

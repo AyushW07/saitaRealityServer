@@ -1,45 +1,27 @@
 // const jwt = require("jsonwebtoken");
-// const secretKey = "STMicheals";
 
-// const loginCheck = async function (req, res, next) {
-//   try {
-//     // Extract the token from the Authorization header
-//     const authHeader = req.headers.authorization;
-//     if (!authHeader) {
-//       return res.status(403).send({
-//         status: false,
-//         message: `Missing authentication token in request`,
-//       });
-//     }
+// const authMidd = (req, res, next) => {
+//   const authHeader = req.headers.authorization;
+//   console.log(authHeader);
 
-//     // Split the header to get the token part
-//     const token = authHeader.split(" ")[1];
-//     if (!token) {
-//       return res.status(403).send({
-//         status: false,
-//         message: `Bearer token not found`,
-//       });
-//     }
+//   const parts = authHeader ? authHeader.split(" ") : [];
 
-//     let decoded = await jwt.verify(token, secretKey);
+//   if (parts.length === 2 && parts[0] === "Bearer") {
+//     const token = parts[1];
 
-//     if (!decoded) {
-//       return res.status(403).send({
-//         status: false,
-//         message: `Invalid authentication token in request`,
-//       });
-//     }
+//     // Here you can add your JWT token verification logic using jwt.verify
+//     // jwt.verify(token, secret, (err, decoded) => { ... });
 
-//     req.userId = decoded.userId;
 //     next();
-//   } catch (error) {
-//     res.status(500).send({ status: false, Error: error.message });
+//   } else {
+//     return res.status(401).send({ status: false, msg: "Unauthorized" });
 //   }
 // };
 
-// module.exports.loginCheck = loginCheck;
+// module.exports = authMidd;
 
 const jwt = require("jsonwebtoken");
+const secret = "chessBoard"; // This should be your actual secret key
 
 const authMidd = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -50,12 +32,22 @@ const authMidd = (req, res, next) => {
   if (parts.length === 2 && parts[0] === "Bearer") {
     const token = parts[1];
 
-    // Here you can add your JWT token verification logic using jwt.verify
-    // jwt.verify(token, secret, (err, decoded) => { ... });
-
-    next();
+    // Verify the token using jwt.verify
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        // If token is not valid or expired, respond with an error
+        return res
+          .status(401)
+          .send({ status: false, msg: "Unauthorized: Invalid token" });
+      } else {
+        // If token is valid, attach decoded token to request and continue
+        req.user = decoded;
+        next();
+      }
+    });
   } else {
-    return res.status(401).send({ status: false, msg: "Unauthorized" });
+    // If the correct authorization header is not present, respond with an error
+    return res.status(401).send({ status: false, msg: "Unauthorized user" });
   }
 };
 
